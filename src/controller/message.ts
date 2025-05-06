@@ -1,5 +1,5 @@
 import CryptoJS from 'crypto-js';
-import { prisma } from '../../prisma/prismaClient.js';
+import { prisma } from '../lib/prismaClient.js';
 
 // Encrypt the message using AES
 const encryptMessage = (message: string, key: string) => {
