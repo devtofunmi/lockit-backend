@@ -19,7 +19,7 @@ export const createMessage = async (
   password: string | null
 ) => {
   if (!message) {
-    throw new Error('message is required');
+    throw new Error('Message is required');
   }
 
   console.log('Incoming values:', {
@@ -29,9 +29,13 @@ export const createMessage = async (
     password,
   });
 
+  // If no password is provided, use a default secret key
   const key = password || 'default_secret_key';
+
+  // Encrypt the message
   const encrypted = encryptMessage(message, key);
 
+  // Create the new message in the database
   const newMessage = await prisma.message.create({
     data: {
       message: encrypted,
@@ -40,7 +44,6 @@ export const createMessage = async (
       password: password ? true : false,
     },
   });
-  
 
   console.log('Data going into Prisma:', {
     message: encrypted,
@@ -48,14 +51,12 @@ export const createMessage = async (
     burnAfterReading,
     password: password ? true : false,
   });
-  
+
   return newMessage;
 };
 
-
-
-
 export const getMessage = async (id: string, password: string | null) => {
+  // Fetch the message by ID
   const message = await prisma.message.findUnique({ where: { id } });
 
   if (!message) throw new Error('Message not found');
@@ -69,8 +70,10 @@ export const getMessage = async (id: string, password: string | null) => {
     }
   }
 
-  // Decrypt the message
+  // Decrypt the message using the provided password or the default key
   const decrypted = decryptMessage(message.message, password || 'default_secret_key');
+
+  // If the decryption fails (e.g., incorrect password or corrupted message)
   if (!decrypted) throw new Error('Incorrect password or message is corrupted');
 
   // Handle burn-after-reading functionality
@@ -80,3 +83,4 @@ export const getMessage = async (id: string, password: string | null) => {
 
   return decrypted;
 };
+

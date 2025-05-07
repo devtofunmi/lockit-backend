@@ -11,18 +11,17 @@ const messageRoutes = (app: Hono) => {
       const { message, expirationMinutes, burnAfterReading, password } = body;
   
       if (!message) {
-        throw new Error('message is required');
+        return c.json({ error: 'Message is required' }, 400);
       }
   
       const newMessage = await createMessage(message, expirationMinutes, burnAfterReading, password);
       return c.json({ id: newMessage.id });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      console.error(errorMessage);
       return c.json({ error: errorMessage }, 500);
     }
   });
-  
-  
 
   // GET route to fetch a message by ID
   app.get('/message/:id', async (c) => {
@@ -35,7 +34,8 @@ const messageRoutes = (app: Hono) => {
       return c.json({ message: decryptedMessage });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      return c.json({ error: errorMessage }, 404);
+      console.error(errorMessage);
+      return c.json({ error: errorMessage }, (err instanceof Error && err.message === 'Message not found') ? 404 : 500);
     }
   });
 };
